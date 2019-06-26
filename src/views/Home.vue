@@ -1,13 +1,14 @@
 <template>
-  <HelloWorld />
+  <div>
+    <data-summary />
+  </div>
 </template>
 
 <script>
-  import HelloWorld from '../components/HelloWorld'
-
-  export default {
-    components: {
-      HelloWorld
-    }
+import DataSummary from '../components/DataSummary';
+export default {
+  components: {
+    DataSummary
   }
+};
 </script>
