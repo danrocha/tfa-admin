@@ -2,10 +2,10 @@
   <div class="w-2/3 px-4">
     <h1 class="text-4xl uppercase mb-8">Add Building</h1>
     <div class="mb-4">
-      <select-architect v-model="building.architect" />
+      <select-architect v-model="building.architectIds" />
       <select-city v-model="building.cityId" />
     </div>
-    <building-actions>
+    <building-actions @success="success">
       <template v-slot="{ add, loading }">
         <v-overlay absolute :value="loading">
           <v-progress-circular indeterminate size="64"></v-progress-circular>
@@ -38,6 +38,7 @@
             v-model="building.gmapsEmbed"
             label="Google Maps Embed Code"
             placeholder="!1m18!1m12!..."
+            @input="formatEmbed"
           ></v-text-field>
         </div>
         <div class="flex mb-8">
@@ -89,7 +90,7 @@ export default {
   data() {
     return {
       building: {
-        architect: null,
+        architectIds: null,
         name: '',
         website: '',
         address: null,
@@ -102,6 +103,15 @@ export default {
         typology: null,
       },
     };
+  },
+  methods: {
+    success() {
+      this.$router.push('/buildings');
+    },
+    formatEmbed(e) {
+      let substr = e.match(/pb=(.*?)" width/);
+      this.building.gmapsEmbed = substr[1];
+    },
   },
 };
 </script>
