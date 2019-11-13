@@ -1,5 +1,5 @@
 <template>
-  <div class="w-2/3">
+  <div class="w-2/3 px-4">
     <h1 class="text-4xl uppercase mb-8">Add Building</h1>
     <div class="mb-4">
       <select-architect v-model="building.architect" />
@@ -40,7 +40,7 @@
             placeholder="!1m18!1m12!..."
           ></v-text-field>
         </div>
-        <div class="flex">
+        <div class="flex mb-8">
           <v-text-field
             v-model="building.year"
             label="Year completed"
@@ -68,7 +68,7 @@
             @click="add(building)"
             >Add</v-btn
           >
-          <v-btn color="secondary" flat to="/">Cancel</v-btn>
+          <v-btn text to="/">Cancel</v-btn>
         </div>
       </template>
     </building-actions>

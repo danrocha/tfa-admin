@@ -1,85 +1,83 @@
 <template>
-  <div v-if="$apollo.loading">Loading...</div>
-  <div v-else>
-    <v-toolbar flat color="white">
-      <v-toolbar-title>Architects</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-dialog v-model="dialog" max-width="500px">
-        <template v-slot:activator="{ on }">
-          <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
-        </template>
-        <v-card>
-          <v-card-title>
-            <h1 class="uppercase text-xl">{{ formTitle }}</h1>
-          </v-card-title>
+  <v-data-table
+    :headers="headers"
+    :items="architects.nodes"
+    item-key="nodeId"
+    class="shadow"
+    disable-pagination
+    hide-default-footer
+    :loading="$apollo.loading"
+    :search="search"
+    show-expand
+    single-expand
+  >
+    <template v-slot:top>
+      <v-toolbar>
+        <v-toolbar-title>Architects</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-text-field
+          v-model="search"
+          append-icon="search"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+        <v-spacer></v-spacer>
+        <v-dialog v-model="dialog" max-width="500px">
+          <template v-slot:activator="{ on }">
+            <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              <h1 class="uppercase text-xl">{{ formTitle }}</h1>
+            </v-card-title>
 
-          <v-card-text>
-            <v-container>
-              <v-text-field
-                v-model="editedItem.name"
-                label="Name"
-              ></v-text-field>
-              <v-text-field
-                v-model="editedItem.website"
-                label="Website"
-              ></v-text-field>
-            </v-container>
-          </v-card-text>
+            <v-card-text>
+              <v-container>
+                <v-text-field
+                  v-model="editedItem.name"
+                  label="Name"
+                ></v-text-field>
+                <v-text-field
+                  v-model="editedItem.website"
+                  label="Website"
+                ></v-text-field>
+              </v-container>
+            </v-card-text>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" flat @click="close">Cancel</v-btn>
-            <v-btn color="primary" @click="save">Save</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-toolbar>
-    <v-data-table
-      :headers="headers"
-      :items="architects.nodes"
-      expand
-      item-key="nodeId"
-      class="shadow"
-    >
-      <template v-slot:items="props">
-        <tr @click="props.expanded = !props.expanded">
-          <td>{{ props.item.name }}</td>
-          <td>
-            <a :href="props.item.website" target="_blank">
-              {{ props.item.website | formatUrl }}
-            </a>
-          </td>
-          <td>{{ props.item.architectBuildings.totalCount }}</td>
-          <td>{{ props.item.createdAt | formatDate }}</td>
-          <td>{{ props.item.updatedAt | formatDate }}</td>
-          <td class="justify-center layout px-0">
-            <v-icon small class="mr-2" @click="editItem(props.item)"
-              >edit</v-icon
-            >
-            <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-          </td>
-        </tr>
-      </template>
-      <template v-slot:expand="props">
-        <v-card flat class="bg-gray-200">
-          <v-card-text>
-            <ul v-if="props.item.architectBuildings.totalCount > 0">
-              <li
-                v-for="architectBuilding in props.item.architectBuildings.nodes"
-                :key="architectBuilding.id"
-              >
-                {{ architectBuilding.building.name }} -
-                {{ architectBuilding.building.city.name }}
-              </li>
-            </ul>
-          </v-card-text>
-        </v-card>
-      </template>
-      <template v-slot:no-data>
-        <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
-      </template>
-    </v-data-table>
-  </div>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="secondary" flat @click="close">Cancel</v-btn>
+              <v-btn color="primary" @click="save">Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-toolbar>
+    </template>
+
+    <template v-slot:item.action="{ item }">
+      <v-icon small class="mr-2" @click="editItem(item)">
+        edit
+      </v-icon>
+      <v-icon small @click="deleteItem(item)">
+        delete
+      </v-icon>
+    </template>
+
+    <template v-slot:expanded-item="{ item, headers }">
+      <td :colspan="headers.length">
+        <ul v-if="item.architectBuildings.totalCount > 0" class="py-4">
+          <li
+            v-for="architectBuilding in item.architectBuildings.nodes"
+            :key="architectBuilding.id"
+          >
+            {{ architectBuilding.building.name }} -
+            {{ architectBuilding.building.city.name }}
+          </li>
+        </ul>
+      </td>
+    </template>
+  </v-data-table>
 </template>
 
 <script>
@@ -121,12 +119,17 @@ export default {
   name: 'Architects',
   data() {
     return {
+      search: '',
       architects: {
         totalCount: 0,
         nodes: [],
       },
       dialog: false,
       headers: [
+        {
+          text: '',
+          value: 'data-table-expand',
+        },
         {
           text: 'Name',
           align: 'left',
@@ -140,8 +143,8 @@ export default {
           align: 'left',
           sortable: true,
         },
-        { text: 'Created At', value: 'createdAt', sortable: true },
-        { text: 'Updated At', value: 'updatedAt', sortable: true },
+
+        { text: 'Actions', value: 'action', sortable: false },
       ],
       editedIndex: -1,
       editedItem: {

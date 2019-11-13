@@ -8,7 +8,7 @@
 import DataSummary from '../components/DataSummary';
 export default {
   components: {
-    DataSummary
-  }
+    DataSummary,
+  },
 };
 </script>

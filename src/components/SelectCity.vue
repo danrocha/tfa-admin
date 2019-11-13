@@ -4,13 +4,12 @@
       v-model="cityId"
       :value="value"
       :loading="$apollo.loading"
-      autofocus
-      :items="cities ? cities.nodes : []"
+      :items="cities.nodes"
       item-text="name"
       item-value="id"
       label="Select a city"
-      :menu-props="{ openOnClick: true }"
       @change="select"
+      prepend-icon="map"
     ></v-select>
   </div>
 </template>

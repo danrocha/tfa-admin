@@ -2,9 +2,7 @@
   <div>
     <v-select
       v-model="countryId"
-      :value="value"
       :loading="$apollo.loading"
-      autofocus
       :items="countries ? countries.nodes : []"
       item-text="name"
       item-value="id"
@@ -28,7 +26,7 @@ export default {
   data() {
     return {
       countries: null,
-      countryId: null,
+      countryId: this.value,
     };
   },
   apollo: {

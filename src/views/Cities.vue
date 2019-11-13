@@ -1,83 +1,71 @@
 <template>
-  <div v-if="$apollo.loading">Loading...</div>
-  <div v-else>
-    <v-toolbar flat color="white">
-      <v-toolbar-title>Cities</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-dialog v-model="dialog" max-width="500px">
-        <template v-slot:activator="{ on }">
-          <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
-        </template>
-        <v-card>
-          <v-card-title>
-            <h1 class="uppercase text-xl">{{ formTitle }}</h1>
-          </v-card-title>
+  <v-data-table
+    :headers="headers"
+    :items="cities.nodes"
+    item-key="nodeId"
+    class="shadow"
+    disable-pagination
+    hide-default-footer
+    :loading="$apollo.loading"
+    show-expand
+    single-expand
+  >
+    <template v-slot:top>
+      <v-toolbar>
+        <v-toolbar-title>Cities</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-dialog v-model="dialog" max-width="500px">
+          <template v-slot:activator="{ on }">
+            <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              <h1 class="uppercase text-xl">{{ formTitle }}</h1>
+            </v-card-title>
+            <v-card-text>
+              <v-container>
+                <v-text-field
+                  v-model="editedItem.name"
+                  label="Name"
+                ></v-text-field>
+                <select-country v-model="editedItem.countryId" />
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn text @click="close">Cancel</v-btn>
+              <v-btn color="primary" @click="save">Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-toolbar>
+    </template>
 
-          <v-card-text>
-            <v-container>
-              <v-text-field
-                v-model="editedItem.name"
-                label="Name"
-              ></v-text-field>
-              <selectCountry v-model="editedItem.countryId" />
-            </v-container>
-          </v-card-text>
+    <template v-slot:item.action="{ item }">
+      <v-icon small class="mr-2" @click="editItem(item)">
+        edit
+      </v-icon>
+      <v-icon small @click="deleteItem(item)">
+        delete
+      </v-icon>
+    </template>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" flat @click="close">Cancel</v-btn>
-            <v-btn color="primary" @click="save">Save</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-toolbar>
-    <v-data-table
-      :headers="headers"
-      :items="cities.nodes"
-      expand
-      item-key="nodeId"
-      class="shadow"
-    >
-      <template v-slot:items="props">
-        <tr @click="props.expanded = !props.expanded">
-          <td>{{ props.item.name }}</td>
-          <td>{{ props.item.country.name }}</td>
-          <td>{{ props.item.buildings.totalCount }}</td>
-          <td>{{ props.item.createdAt | formatDate }}</td>
-          <td>{{ props.item.updatedAt | formatDate }}</td>
-          <td class="justify-center layout px-0">
-            <v-icon small class="mr-2" @click="editItem(props.item)"
-              >edit</v-icon
+    <template v-slot:expanded-item="{ item, headers }">
+      <td :colspan="headers.length">
+        <ul v-if="item.buildings.totalCount > 0" class="py-4">
+          <li v-for="building in item.buildings.nodes" :key="building.id">
+            <span class="mr-2">{{ building.name }}</span>
+            <span
+              v-for="architectBuilding in building.architectBuildings.nodes"
+              :key="architectBuilding.id"
+              class="mr-2 text-gray-500"
+              >{{ architectBuilding.architect.name }}</span
             >
-            <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-          </td>
-        </tr>
-      </template>
-      <template v-slot:expand="props">
-        <v-card flat class="bg-gray-200">
-          <v-card-text>
-            <ul v-if="props.item.buildings.totalCount > 0">
-              <li
-                v-for="building in props.item.buildings.nodes"
-                :key="building.id"
-              >
-                {{ building.name }}
-                <span
-                  v-for="architectBuilding in building.architectBuildings.nodes"
-                  :key="architectBuilding.id"
-                  class="mr-2 text-gray-500"
-                  >{{ architectBuilding.architect.name }}</span
-                >
-              </li>
-            </ul>
-          </v-card-text>
-        </v-card>
-      </template>
-      <template v-slot:no-data>
-        <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
-      </template>
-    </v-data-table>
-  </div>
+          </li>
+        </ul>
+      </td>
+    </template>
+  </v-data-table>
 </template>
 
 <script>
@@ -92,6 +80,7 @@ const CITY_FRAGMENT = gql`
     country {
       id
       name
+      iso
     }
     buildings {
       totalCount
@@ -135,20 +124,28 @@ export default {
       dialog: false,
       headers: [
         {
+          text: '',
+          value: 'data-table-expand',
+        },
+        {
           text: 'Name',
           align: 'left',
           sortable: true,
           value: 'name',
         },
-        { text: 'Country', value: 'website', align: 'left', sortable: true },
+        {
+          text: 'Country',
+          value: 'country.iso',
+          align: 'left',
+          sortable: true,
+        },
         {
           text: 'Buildings',
           value: 'buildings.totalCount',
           align: 'left',
           sortable: true,
         },
-        { text: 'Created At', value: 'createdAt', sortable: true },
-        { text: 'Updated At', value: 'updatedAt', sortable: true },
+        { text: 'Actions', value: 'action', sortable: false },
       ],
       editedIndex: -1,
       editedItem: {

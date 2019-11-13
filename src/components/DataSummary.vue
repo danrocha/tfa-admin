@@ -1,15 +1,15 @@
 <template>
-  <div class="w-2/3">
-    <v-btn flat color="primary" dark small to="/architects"
+  <div class="container flex flex-col items-start justify-start">
+    <v-btn outlined color="primary" x-large to="/architects" class="m-2"
       >{{ architects.totalCount }} architects</v-btn
     >
-    <v-btn flat color="primary" dark small to="/buildings"
+    <v-btn outlined color="primary" x-large to="/buildings" class="m-2"
       >{{ buildings.totalCount }} buildings</v-btn
     >
-    <v-btn flat color="primary" dark small to="/cities"
+    <v-btn outlined color="primary" x-large to="/cities" class="m-2"
       >{{ cities.totalCount }} cities</v-btn
     >
-    <v-btn flat color="primary" dark small to="/countries"
+    <v-btn outlined color="primary" x-large to="/countries" class="m-2"
       >{{ countries.totalCount }} countries</v-btn
     >
   </div>

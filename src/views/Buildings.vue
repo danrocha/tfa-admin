@@ -1,99 +1,68 @@
 <template>
-  <div v-if="$apollo.loading">Loading...</div>
-  <div v-else>
-    <v-toolbar flat color="white">
-      <v-toolbar-title>Buildings</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn
-        color="primary"
-        dark
-        class="mb-2"
-        @push="$router.push('/add-building')"
-        >Add</v-btn
-      >
-      <!-- <v-dialog v-model="dialog" max-width="500px">
-        <template v-slot:activator="{ on }">
-          <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
-        </template>
-        <v-card>
-          <v-card-title>
-            <h1 class="uppercase text-xl">{{ formTitle }}</h1>
-          </v-card-title>
+  <v-data-table
+    :headers="headers"
+    :items="buildings.nodes"
+    item-key="nodeId"
+    class="shadow"
+    disable-pagination
+    hide-default-footer
+    :loading="$apollo.loading"
+    :search="search"
+    show-expand
+    single-expand
+  >
+    <template v-slot:top>
+      <v-toolbar>
+        <v-toolbar-title>Buildings</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-text-field
+          v-model="search"
+          append-icon="search"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" dark class="mb-2" to="/add-building">Add</v-btn>
+      </v-toolbar>
+    </template>
 
-          <v-card-text>
-            <v-container>
-              <v-text-field
-                v-model="editedItem.name"
-                label="Name"
-              ></v-text-field>
-              <v-text-field
-                v-model="editedItem.website"
-                label="Website"
-              ></v-text-field>
-            </v-container>
-          </v-card-text>
+    <template v-slot:item.action="{ item }">
+      <v-icon small class="mr-2" @click="editItem(item)">
+        edit
+      </v-icon>
+      <v-icon small @click="deleteItem(item)">
+        delete
+      </v-icon>
+    </template>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" flat @click="close">Cancel</v-btn>
-            <v-btn color="primary" @click="save">Save</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog> -->
-    </v-toolbar>
-    <v-data-table
-      :headers="headers"
-      :items="buildings.nodes"
-      expand
-      item-key="nodeId"
-      class="shadow"
-    >
-      <template v-slot:items="props">
-        <tr @click="props.expanded = !props.expanded">
-          <td>{{ props.item.name }}</td>
-          <td>
-            <ul>
-              <li
-                v-for="architectBuilding in props.item.architectBuildings.nodes"
-                :key="architectBuilding.id"
-              >
-                {{ architectBuilding.architect.name }}
-              </li>
-            </ul>
-          </td>
-          <td>
-            <p>{{ props.item.city.name }}</p>
-            <p v-if="props.item.address" class="text-gray-500">
-              {{ props.item.address }}
-            </p>
-          </td>
-          <td>{{ props.item.year }}</td>
-          <td>
-            <p>{{ props.item.typology }}</p>
-            <p v-if="props.item.gfa">{{ props.item.gfa }}sqm</p>
-            <p v-if="props.item.height > 0">{{ props.item.height }}m</p>
-          </td>
-          <td>
-            <a :href="props.item.website" target="_blank">{{
-              props.item.website | formatUrl
-            }}</a>
-          </td>
-          <td>{{ props.item.createdAt | formatDate }}</td>
-          <td>{{ props.item.updatedAt | formatDate }}</td>
-          <td class="justify-center layout px-0">
-            <v-icon small class="mr-2" @click="editItem(props.item)"
-              >edit</v-icon
+    <template v-slot:expanded-item="{ item, headers }">
+      <td :colspan="headers.length" class="py-4">
+        <p>
+          <v-icon small class="mr-2">link</v-icon
+          ><a :href="item.website" target="_blank">{{ item.website }}</a>
+        </p>
+        <p class="flex">
+          <v-icon small class="mr-2">person</v-icon>
+          <span
+            v-for="({ architect }, index) in item.architectBuildings.nodes"
+            :key="architect.id"
+          >
+            {{ architect.name
+            }}<span v-if="index < item.architectBuildings.totalCount - 1"
+              >,&nbsp;</span
             >
-            <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-          </td>
-        </tr>
-      </template>
-
-      <template v-slot:no-data>
-        <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
-      </template>
-    </v-data-table>
-  </div>
+          </span>
+        </p>
+        <div class="flex flex-wrap">
+          <p class="mr-2">{{ item.year }}</p>
+          <p class="mr-2" v-if="item.gfa">{{ item.gfa }}sqm</p>
+          <p class="mr-2" v-if="item.height > 0">{{ item.height }}m</p>
+          <p class="mr-2">{{ item.typology }}</p>
+        </div>
+      </td>
+    </template>
+  </v-data-table>
 </template>
 
 <script>
@@ -142,6 +111,7 @@ export default {
   name: 'Buildings',
   data() {
     return {
+      search: '',
       buildings: {
         totalCount: 0,
         nodes: [],
@@ -150,49 +120,17 @@ export default {
       headers: [
         {
           text: 'Name',
-          align: 'left',
           sortable: true,
           value: 'name',
         },
+
         {
-          text: 'Architects',
-          align: 'left',
-          sortable: false,
-        },
-        {
-          text: 'Location',
-          align: 'left',
+          text: 'City',
           sortable: true,
           value: 'city.name',
         },
 
-        {
-          text: 'Year',
-          align: 'left',
-          sortable: true,
-          value: 'year',
-          width: '25px',
-        },
-        {
-          text: 'Details',
-          align: 'left',
-          sortable: false,
-          value: 'details',
-        },
-        { text: 'Website', value: 'website', align: 'left', sortable: false },
-
-        {
-          text: 'Created At',
-          value: 'createdAt',
-          sortable: true,
-          width: '75',
-        },
-        {
-          text: 'Updated At',
-          value: 'updatedAt',
-          sortable: true,
-          width: '75',
-        },
+        { text: 'Actions', value: 'action', sortable: false },
       ],
       editedIndex: -1,
       editedItem: {
