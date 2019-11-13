@@ -56,8 +56,8 @@
         </p>
         <div class="flex flex-wrap">
           <p class="mr-2">{{ item.year }}</p>
-          <p class="mr-2" v-if="item.gfa">{{ item.gfa }}sqm</p>
-          <p class="mr-2" v-if="item.height > 0">{{ item.height }}m</p>
+          <p v-if="item.gfa" class="mr-2">{{ item.gfa }}sqm</p>
+          <p v-if="item.height > 0" class="mr-2">{{ item.height }}m</p>
           <p class="mr-2">{{ item.typology }}</p>
         </div>
       </td>
@@ -98,7 +98,7 @@ const BUILDING_FRAGMENT = gql`
 `;
 const BUILDINGS = gql`
   query buildings {
-    buildings(orderBy: NAME_ASC) {
+    buildings(orderBy: CREATED_AT_DESC) {
       totalCount
       nodes {
         ...building
@@ -118,6 +118,11 @@ export default {
       },
       dialog: false,
       headers: [
+        {
+          text: 'ID',
+          sortable: true,
+          value: 'id',
+        },
         {
           text: 'Name',
           sortable: true,
