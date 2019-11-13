@@ -47,7 +47,7 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="secondary" flat @click="close">Cancel</v-btn>
+              <v-btn color="secondary" text @click="close">Cancel</v-btn>
               <v-btn color="primary" @click="save">Save</v-btn>
             </v-card-actions>
           </v-card>
