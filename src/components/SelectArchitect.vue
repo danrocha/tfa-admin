@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-select
+    <v-autocomplete
       v-model="architect"
       :loading="$apollo.loading"
       autofocus
@@ -13,7 +13,22 @@
       deletable-chips
       prepend-icon="person"
       @change="selectArchitect"
-    ></v-select>
+    >
+    </v-autocomplete>
+    <!-- <v-select
+      v-model="architect"
+      :loading="$apollo.loading"
+      autofocus
+      :items="architects.nodes"
+      item-text="name"
+      item-value="id"
+      label="Select an architect/office"
+      multiple
+      chips
+      deletable-chips
+      prepend-icon="person"
+      @change="selectArchitect"
+    ></v-select> -->
   </div>
 </template>
 
@@ -23,7 +38,7 @@ export default {
   name: 'SelectArchitect',
   data() {
     return {
-      architects: null,
+      architects: { nodes: [] },
       architect: null,
     };
   },
