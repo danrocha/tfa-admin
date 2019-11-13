@@ -8,8 +8,8 @@
       item-text="name"
       item-value="id"
       label="Select a city"
-      @change="select"
       prepend-icon="map"
+      @change="select"
     ></v-select>
   </div>
 </template>
@@ -26,8 +26,8 @@ export default {
   },
   data() {
     return {
-      cities: null,
-      cityId: null,
+      cities: { nodes: [] },
+      cityId: this.value,
     };
   },
   apollo: {
@@ -46,8 +46,8 @@ export default {
     },
   },
   methods: {
-    select(e) {
-      this.$emit('input', e[0]);
+    select() {
+      this.$emit('input', this.cityId);
     },
   },
 };
