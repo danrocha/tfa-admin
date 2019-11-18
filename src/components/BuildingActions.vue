@@ -1,16 +1,130 @@
 <template>
   <div>
-    <slot :add="add" :loading="loading" />
+    <slot
+      :add="add"
+      :loading="loading || $apollo.loading"
+      :building="buildingById"
+      :buildings="buildings"
+      :totalCount="totalCount"
+    />
   </div>
 </template>
 
 <script>
 import gql from 'graphql-tag';
+const BUILDING_FRAGMENT = gql`
+  fragment building on Building {
+    nodeId
+    id
+    name
+    address
+    architectBuildings {
+      totalCount
+      nodes {
+        id
+        architectId
+        architect {
+          id
+          name
+        }
+      }
+    }
+    city {
+      name
+    }
+    website
+    year
+    typology
+    gfa
+    height
+    createdAt
+    updatedAt
+  }
+`;
 export default {
+  name: 'BuildingActions',
+  props: {
+    buildingId: {
+      type: [Number, String],
+      default: null,
+    },
+    getAllBuildings: {
+      type: Boolean,
+      default: false,
+    },
+    getTotalCount: {
+      type: Boolean,
+      default: false,
+    },
+    getBuilding: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       loading: false,
+      buildings: null,
+      buildingById: null,
+      totalCount: null,
     };
+  },
+  mounted() {
+    this.$apollo.queries.buildingsTotalCount.skip = !this.getTotalCount;
+    this.$apollo.queries.buildings.skip = !this.getAllBuildings;
+    this.$apollo.queries.buildingById.skip =
+      !this.getBuilding && this.buildingId;
+  },
+  apollo: {
+    buildingsTotalCount: {
+      query: gql`
+        query buildings {
+          buildings {
+            totalCount
+          }
+        }
+      `,
+      update(data) {
+        return (this.totalCount = data.buildings.totalCount);
+      },
+      skip: true,
+    },
+    buildings: {
+      query: gql`
+        query buildings {
+          buildings(orderBy: CREATED_AT_DESC) {
+            totalCount
+            nodes {
+              ...building
+            }
+          }
+        }
+        ${BUILDING_FRAGMENT}
+      `,
+      skip: true,
+    },
+    buildingById: {
+      query: gql`
+        query buildingById($id: Int!) {
+          buildingById(id: $id) {
+            ...building
+          }
+        }
+        ${BUILDING_FRAGMENT}
+      `,
+      variables() {
+        return {
+          id: Number(this.buildingId),
+        };
+      },
+      skip: true,
+    },
+  },
+  watch: {
+    getTotalCount(newVal) {
+      if (newVal)
+        return (this.$apollo.queries.buildingsTotalCount.skip = false);
+    },
   },
   methods: {
     async add(buildingInfo) {

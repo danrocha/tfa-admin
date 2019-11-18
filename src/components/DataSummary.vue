@@ -3,9 +3,14 @@
     <v-btn outlined color="primary" x-large to="/architects" class="m-2"
       >{{ architects.totalCount }} architects</v-btn
     >
-    <v-btn outlined color="primary" x-large to="/buildings" class="m-2"
-      >{{ buildings.totalCount }} buildings</v-btn
-    >
+    <building-actions :get-total-count="true">
+      <template v-slot="{ totalCount, loading }">
+        <v-btn outlined color="primary" x-large to="/buildings" class="m-2"
+          ><span v-if="loading">...</span
+          ><span v-else>{{ totalCount }}</span> buildings</v-btn
+        >
+      </template>
+    </building-actions>
     <v-btn outlined color="primary" x-large to="/cities" class="m-2"
       >{{ cities.totalCount }} cities</v-btn
     >
@@ -17,9 +22,13 @@
 
 <script>
 import gql from 'graphql-tag';
+import BuildingActions from '@/components/BuildingActions';
 
 export default {
   name: 'DataSummary',
+  components: {
+    BuildingActions,
+  },
   data() {
     return {
       architects: null,
@@ -36,15 +45,7 @@ export default {
         }
       `,
     },
-    buildings: {
-      query: gql`
-        query buildings {
-          buildings {
-            totalCount
-          }
-        }
-      `,
-    },
+
     countries: {
       query: gql`
         query countries {
