@@ -26,6 +26,12 @@ export default new Router({
         import(/* webpackChunkName: "AddBuilding" */ './views/AddBuilding.vue'),
     },
     {
+      path: '/add-links',
+      name: 'AddLinks',
+      component: () =>
+        import(/* webpackChunkName: "AddBuilding" */ './views/AddLinks.vue'),
+    },
+    {
       path: '/buildings',
       name: 'Buildings',
       component: () =>
