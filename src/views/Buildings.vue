@@ -109,6 +109,16 @@ export default {
           sortable: true,
           value: 'city.name',
         },
+        {
+          text: 'Lat',
+          sortable: true,
+          value: 'lat',
+        },
+        {
+          text: 'Lng',
+          sortable: true,
+          value: 'lng',
+        },
 
         { text: 'Actions', value: 'action', sortable: false },
       ],
