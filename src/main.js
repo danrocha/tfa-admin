@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import * as VueGoogleMaps from 'vue2-google-maps';
-import { GmapAutocomplete } from 'vue2-google-maps/src/components/autocomplete';
+//import { GmapAutocomplete } from 'vue2-google-maps/src/components/autocomplete';
 import moment from 'moment';
 import App from './App.vue';
 import router from './router';
@@ -12,12 +12,12 @@ Vue.use(VueGoogleMaps, {
   load: {
     key: process.env.VUE_APP_GOOGLE_MAPS_API_KEY,
     libraries: 'places',
-    installComponents: false,
+    installComponents: true,
     region: 'US',
     language: 'en',
   },
 });
-Vue.component('GmapAutocomplete', GmapAutocomplete);
+//Vue.component('GmapAutocomplete', GmapAutocomplete);
 
 Vue.filter('formatDate', function(value) {
   if (value) {
