@@ -3,7 +3,7 @@
     <slot
       :add="add"
       :loading="loading || $apollo.loading"
-      :building="buildingById"
+      :building="building"
       :buildings="buildings"
       :totalCount="totalCount"
     />
@@ -37,6 +37,8 @@ const BUILDING_FRAGMENT = gql`
     typology
     gfa
     height
+    lat
+    lng
     createdAt
     updatedAt
   }
@@ -65,15 +67,14 @@ export default {
     return {
       loading: false,
       buildings: null,
-      buildingById: null,
+      building: null,
       totalCount: null,
     };
   },
   mounted() {
     this.$apollo.queries.buildingsTotalCount.skip = !this.getTotalCount;
     this.$apollo.queries.buildings.skip = !this.getAllBuildings;
-    this.$apollo.queries.buildingById.skip =
-      !this.getBuilding && this.buildingId;
+    this.$apollo.queries.building.skip = !this.getBuilding && this.buildingId;
   },
   apollo: {
     buildingsTotalCount: {
@@ -103,10 +104,10 @@ export default {
       `,
       skip: true,
     },
-    buildingById: {
+    building: {
       query: gql`
-        query buildingById($id: Int!) {
-          buildingById(id: $id) {
+        query building($id: Int!) {
+          building(id: $id) {
             ...building
           }
         }
